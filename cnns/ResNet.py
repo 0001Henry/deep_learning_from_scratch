@@ -30,9 +30,8 @@ class Residual_bottle(nn.Module):
         self.c3 = nn.LazyConv2d(num_channels, kernel_size=1)
         
         # use 1x1conv to make C,H,W the same
-        self.c4 = nn.LazyConv2d(num_channels, kernel_size=1, stride=strides)
+        self.downsample = nn.LazyConv2d(num_channels, kernel_size=1, stride=strides)
 
-            
         self.bn1 = nn.LazyBatchNorm2d()
         self.bn2 = nn.LazyBatchNorm2d()
         self.bn3 = nn.LazyBatchNorm2d()
@@ -42,7 +41,7 @@ class Residual_bottle(nn.Module):
         y = F.relu(self.bn2(self.c2(y)))
         y = self.bn3(self.c3(y)) 
 
-        x = self.c4(x)
+        x = self.downsample(x)
         y += x
         return F.relu(y)
     
@@ -58,7 +57,7 @@ class ResNet(nn.Module):
         
         blk_list = []
         for i, b in enumerate(arch):
-            blk_list.append(self.block(*b, first_blk=(i==0)))
+            blk_list.append(self._make_block(*b, first_blk=(i==0)))
         self.conv2345 = nn.Sequential(*blk_list)
         
         self.last = nn.Sequential(
@@ -67,19 +66,14 @@ class ResNet(nn.Module):
             nn.LazyLinear(num_classes)
         )
     
-    def block(self, num_residuals, num_channels, flag_bottle=False, first_blk=False):
+    def _make_block(self, num_residuals, num_channels, flag_bottle=False, first_blk=False):
         blk = []
+        ResidualClass = Residual_bottle if flag_bottle else Residual
+        strides = 2 if not first_blk else 1
         for i in range(num_residuals):
-            if not flag_bottle:
-                if i == 0 and not first_blk:
-                    blk.append(Residual(num_channels, strides=2)) 
-                else:
-                    blk.append(Residual(num_channels))
-            else:
-                if i == 0 and not first_blk:
-                    blk.append(Residual_bottle(num_channels, strides=2))
-                else:
-                    blk.append(Residual_bottle(num_channels))
+            strides = strides if i == 0 else 1
+            blk.append(ResidualClass(num_channels, strides=strides)) 
+
         return nn.Sequential(*blk)
         
     def forward(self, x):
@@ -124,7 +118,7 @@ if __name__ == '__main__':
     y = model(x)
     print(y.shape)
     # print(model)
-    torch.onnx.export(model,x,"./onnx/ResNet50.onnx")
+    # torch.onnx.export(model,x,"./onnx/ResNet50.onnx")
     
     # y = Residual(num_channels=10,strides=1)(x)
     # print(y.shape())
