@@ -6,30 +6,31 @@
 - **Self-Attention**: This allows each element of the input sequence to evaluate and assign a weight to every other element, which is crucial for understanding the relationships within the sequence.
     1. **Query, Key, and Value Vectors**: Each element of the input is transformed into three vectors - Query (Q), Key (K), and Value (V).
     2. **Score Calculation**: The score is calculated by taking the dot product of the Query with all Keys.
-       $$
+         $$
        \text{Score} = QK^T
-       $$
+         $$
     3. **Softmax to Get Weights**: The scores are then passed through a softmax layer to normalize them into a probability distribution.
-       $$
+
+         $$
        \text{Weights} = \text{softmax}(\text{Score})
-       $$
+         $$
     4. **Weighted Sum**: The output is computed as a weighted sum of the Value vectors, using the softmax output as weights.
-       $$
+
+         $$
        \text{Output} = \text{Weights} \times V
-       $$
+         $$
 - **Multi-Head Attention**: Multi-Head Attention allows the model to capture various types of relationships in the data by processing the input in parallel across different representation subspaces.
-  - **Computation**:
-       $$
+         $$
     \text{MultiHead}(Q, K, V) = \text{Concat}(\text{head}_1, \text{head}_2, ..., \text{head}_h)W^O
-       $$
+         $$
     Where each head is computed as:
-       $$
+         $$
     \text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)
-       $$
+         $$
 - **Scaled Dot-Product Attention**: Scaled Dot-Product Attention is a mechanism used in the self-attention process, particularly within the Transformer model architecture. It incorporates a scaling factor to normalize the dot products, preventing overly large values that could lead to gradient vanishing during the Softmax calculation.
-
-
-$$ \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V $$
+      $$ 
+   \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right) V 
+      $$
 
 
 # Transformer
