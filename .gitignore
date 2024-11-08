@@ -2,6 +2,7 @@ data/
 onnx/
 *.pth
 *.pt
+paper/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
